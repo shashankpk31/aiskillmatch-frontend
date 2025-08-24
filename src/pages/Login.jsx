@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import {Link, useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 
 function Login() {
@@ -12,12 +12,8 @@ function Login() {
     e.preventDefault();
     try {
       const response = await axios.post('http://localhost:8080/api/auth/login', { email, password });
-      localStorage.setItem('token', response.data);
-      // Decode token to get role (simplified, assumes backend includes role in token)
-      const roleResponse = await axios.get('http://localhost:8080/api/users', {
-        headers: { Authorization: `Bearer ${response.data}` },
-      });
-      localStorage.setItem('role', roleResponse.data.role);
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('role', response.data.role);
       navigate('/dashboard');
     } catch (err) {
       setError('Invalid credentials');
