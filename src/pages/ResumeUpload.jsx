@@ -13,7 +13,7 @@ function ResumeUpload() {
     }
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('userId', 1); // Replace with actual user ID from auth
+    formData.append('userId', localStorage.getItem('userId'));
     try {
       await axios.post('http://localhost:8080/api/resumes/upload', formData, {
         headers: {

@@ -7,8 +7,8 @@ function Dashboard() {
   const [error, setError] = useState('');
   const role = localStorage.getItem('role');
 
-  useEffect(() => {
-    const fetchJobs = async () => {
+   const fetchJobs = async () => {
+      
       try {
         const response = await axios.get('http://localhost:8080/api/jobs', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
@@ -18,6 +18,9 @@ function Dashboard() {
         setError('Failed to fetch jobs');
       }
     };
+
+  useEffect(() => {
+   
     fetchJobs();
   }, []);
 
@@ -29,13 +32,15 @@ function Dashboard() {
       skills: e.target.skills.value,
       location: e.target.location.value,
       salary: e.target.salary.value,
-      userId: 1, // Replace with actual user ID from auth
+      userId: localStorage.getItem('userId')
     };
-    try {
-      await axios.post('http://localhost:8080/api/jobs', formData, {
+    try {      
+      let response =await axios.post('http://localhost:8080/api/jobs', formData, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
+      
       fetchJobs();
+      e.target.reset()
     } catch (err) {
       setError('Failed to create job');
     }
