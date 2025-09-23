@@ -1,33 +1,62 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { useForm, FormProvider } from 'react-hook-form';
-import {useAuth} from '../hooks/useAuth';
-import InputField from '../components/InputField';
-import Button from '../components/Button';
-import Hero from '../components/Hero';
-import Navbar from '../components/Navbar';
+import { FormProvider, useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+import AuthLayout from '../components/layouts/AuthLayout';
+import InputField from '../../components/common/InputField';
+import Button from '../../components/common/Button';
+import { authService } from '../../services/authService';
+
+const schema = yup.object({
+  password: yup
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      'Password must contain at least one uppercase letter, one lowercase letter, and one number'
+    )
+    .required('Password is required'),
+  confirmPassword: yup
+    .string()
+    .oneOf([yup.ref('password'), null], 'Passwords must match')
+    .required('Confirm password is required'),
+}).required();
 
 const PasswordResetPage = () => {
-  const methods = useForm({
-    defaultValues: {
-      password: '',
-      confirmPassword: '',
-    },
-  });
-  const { resetUserPassword, isLoading, error, success, clearAuthMessages, user } = useAuth();
+  const [isValidating, setIsValidating] = useState(true);
+  const [tokenError, setTokenError] = useState(null);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
+  
+  const methods = useForm({
+    resolver: yupResolver(schema),
+    mode: 'onBlur'
+  });
 
   useEffect(() => {
-    if (user) {
-      navigate('/');
-    }
-    if (success) {
-      navigate('/login');
-    }
-    return () => clearAuthMessages();
-  }, [user, success, navigate, clearAuthMessages]);
+    const validateToken = async () => {
+      if (!token) {
+        setTokenError('No reset token provided');
+        setIsValidating(false);
+        return;
+      }
+
+      const { isValid, error } = await authService.validateResetToken(token);
+      
+      if (!isValid) {
+        setTokenError(error);
+        setTimeout(() => {
+          navigate('/forgot-password');
+        }, 3000);
+      }
+      
+      setIsValidating(false);
+    };
+
+    validateToken();
+  }, [token, navigate]);
 
   const onSubmit = async (data) => {
     if (data.password !== data.confirmPassword) {
@@ -36,6 +65,27 @@ const PasswordResetPage = () => {
     }
     await resetUserPassword(token, data.password);
   };
+
+  if (isValidating) {
+    return (
+      <AuthLayout title="Validating Reset Token">
+        <div className="flex justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600" />
+        </div>
+      </AuthLayout>
+    );
+  }
+
+  if (tokenError) {
+    return (
+      <AuthLayout title="Invalid Reset Token">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{tokenError}</p>
+          <p className="text-gray-600">Redirecting to password reset request...</p>
+        </div>
+      </AuthLayout>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[var(--color-background)]">

@@ -1,9 +1,9 @@
 import React from 'react';
-import Navbar from '../components/Navbar';
-import Hero from '../components/Hero';
-import JobList from '../components/JobList';    
+import Navbar from '../../components/common/Navbar';
+import Hero from '../../components/common/Hero';
+import JobList from '../../components/jobs/JobList';    
 import { useSelector } from 'react-redux';
-import { selectAllJobs } from '../features/jobs/jobSlice';
+import { selectAllJobs } from '../../features/jobs/jobSlice';
 
 const HomePage = () => {
     const jobs = useSelector(selectAllJobs);

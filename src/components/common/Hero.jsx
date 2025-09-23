@@ -1,5 +1,5 @@
 
-import heroImage from '../assets/hero-image.png'; 
+import heroImage from '../../assets/hero-image.png'; 
 
 // responsive hero section with image and text and tailwindcss styling height like 100vh ect
 const Hero = () => {

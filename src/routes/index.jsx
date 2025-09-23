@@ -2,15 +2,15 @@ import React, { lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import PrivateRoute from './PrivateRoute';
 import PublicRoute from './PublicRoute';
-import MainLayout from '../components/layouts/MainLayout';
+import MainLayout from '../components/layout/MainLayout';
 
 // Lazy load pages
-const HomePage = lazy(() => import('../pages/HomePage'));
-const LoginPage = lazy(() => import('../pages/LoginPage'));
-const RegisterPage = lazy(() => import('../pages/RegisterPage'));
-const JobPage = lazy(() => import('../pages/JobPage'));
-const PasswordResetRequestPage = lazy(() => import('../pages/PasswordResetRequestPage'));
-const PasswordResetPage = lazy(() => import('../pages/PasswordResetPage'));
+const HomePage = lazy(() => import('../pages/common/HomePage'));
+const LoginPage = lazy(() => import('../pages/auth/LoginPage'));
+const RegisterPage = lazy(() => import('../pages/auth/RegisterPage'));
+const JobPage = lazy(() => import('../pages/jobs/JobPage'));
+const PasswordResetRequestPage = lazy(() => import('../pages/auth/PasswordResetRequestPage'));
+const PasswordResetPage = lazy(() => import('../pages/auth/PasswordResetPage'));
 
 const AppRoutes = () => {
   return (

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
-import {useAuth} from '../hooks/useAuth';
-import InputField from '../components/InputField';
-import Button from '../components/Button';
-import Hero from '../components/Hero';
-import Navbar from '../components/Navbar';
+import {useAuth} from '../../hooks/useAuth';
+import InputField from '../../components/common/InputField';
+import Button from '../../components/common/Button';
+import Hero from '../../components/common/Hero';
+import Navbar from '../../components/common/Navbar';
 
 const RegisterPage = () => {
   const methods = useForm({
