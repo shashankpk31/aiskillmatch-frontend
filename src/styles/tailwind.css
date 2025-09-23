@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #4A90E2; /* Primary Blue */
+  --color-secondary: #50E3C2; /* Teal */
+  --color-accent: #9013FE; /* Purple */
+  --color-background: #F5F7FA; /* Light Gray */
+  --color-text: #4A4A4A; /* Dark Gray */
+}
+
+:dark {
+  --color-primary: #1E3A8A; /* Darker Blue */
+  --color-secondary: #0D9488; /* Darker Teal */
+  --color-accent: #7C3AED; /* Darker Purple */
+  --color-background: #111827; /* Dark Gray */
+  --color-text: #D1D5DB; /* Light Gray */
+}
+
