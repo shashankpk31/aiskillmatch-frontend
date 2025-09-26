@@ -17,6 +17,28 @@ export const useAuth = () => {
     (state) => state.auth
   );
 
+  const registerUser = async (data) => {
+    try {
+      dispatch(setLoading(true));
+      dispatch(clearMessages());
+
+      const response = await axiosInstance.post('/auth/register', data);
+
+      // Expecting only a success message, no user/token
+      if (response.data.success) {
+        dispatch(setSuccessMessage(response.data.message || 'Registration successful!'));
+      } else {
+        dispatch(setError(response.data.message || 'Registration failed.'));
+      }
+
+    } catch (err) {
+      dispatch(setError(err.response?.data?.message || 'Registration failed'));
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
+
   const login = async (credentials) => {
     try {
       dispatch(setLoading(true));
@@ -50,6 +72,7 @@ export const useAuth = () => {
     successMessage,
     login,
     logout,
-    clearAuthMessages
+    clearAuthMessages,
+    registerUser
   };
 };

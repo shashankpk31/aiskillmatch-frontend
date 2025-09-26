@@ -1,82 +1,129 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
-import {useAuth} from '../../hooks/useAuth';
-import InputField from '../../components/common/InputField';
-import Button from '../../components/common/Button';
-import Hero from '../../components/common/Hero';
-import Navbar from '../../components/common/Navbar';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm, FormProvider, useFieldArray } from "react-hook-form";
+import { useAuth } from "../../hooks/useAuth";
+import InputField from "../../components/common/InputField";
+import Button from "../../components/common/Button";
+import Navbar from "../../components/common/Navbar";
+
+const TOTAL_STEPS = 3;
 
 const RegisterPage = () => {
   const methods = useForm({
     defaultValues: {
-      username: '',
-      email: '',
-      password: '',
-      role: '',
-      fullName: '',
-      headline: '',
-      bio: '',
-      skills: [''],
-      experience: [{ organization: '', role: '', duration: '', responsibilities: [''] }],
-      education: [{ institution: '', degree: '', fieldOfStudy: '', duration: '' }],
-      projects: [{ projectName: '', description: '', technologies: '', duration: '' }],
+      username: "",
+      email: "",
+      password: "",
+      role: "",
+      fullName: "",
+      headline: "",
+      bio: "",
+      skills: [""],
+      experience: [
+        { organization: "", role: "", duration: "", responsibilities: [""] },
+      ],
+      education: [
+        { institution: "", degree: "", fieldOfStudy: "", duration: "" },
+      ],
+      projects: [
+        { projectName: "", description: "", technologies: "", duration: "" },
+      ],
     },
   });
-  const { registerUser, isLoading, error, success, clearAuthMessages, user } = useAuth();
+
+  const { registerUser, isLoading, error, success, clearAuthMessages, user } =
+    useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
 
-  const { fields: skillFields, append: appendSkill, remove: removeSkill } = useFieldArray({
+  const {
+    fields: skillFields,
+    append: appendSkill,
+    remove: removeSkill,
+  } = useFieldArray({
     control: methods.control,
-    name: 'skills',
+    name: "skills",
   });
-  const { fields: experienceFields, append: appendExperience, remove: removeExperience } = useFieldArray({
+  const {
+    fields: experienceFields,
+    append: appendExperience,
+    remove: removeExperience,
+  } = useFieldArray({
     control: methods.control,
-    name: 'experience',
+    name: "experience",
   });
-  const { fields: educationFields, append: appendEducation, remove: removeEducation } = useFieldArray({
+  const {
+    fields: educationFields,
+    append: appendEducation,
+    remove: removeEducation,
+  } = useFieldArray({
     control: methods.control,
-    name: 'education',
+    name: "education",
   });
-  const { fields: projectFields, append: appendProject, remove: removeProject } = useFieldArray({
+  const {
+    fields: projectFields,
+    append: appendProject,
+    remove: removeProject,
+  } = useFieldArray({
     control: methods.control,
-    name: 'projects',
+    name: "projects",
   });
 
   useEffect(() => {
     if (user) {
-      navigate('/');
+      navigate("/");
     }
     if (success) {
-      navigate('/login');
+      navigate("/login");
     }
     return () => clearAuthMessages();
   }, [user, success, navigate, clearAuthMessages]);
 
+  // Only submit on last step
   const onSubmit = async (data) => {
-    if (step < 3) {
-      setStep(step + 1);
-      return;
-    }
     // Transform skills and responsibilities to arrays
     const formattedData = {
       ...data,
-      skills: data.skills.filter((skill) => skill.trim() !== ''),
+      skills: data.skills.filter((skill) => skill.trim() !== ""),
       experience: data.experience.map((exp) => ({
         ...exp,
-        responsibilities: exp.responsibilities.filter((resp) => resp.trim() !== ''),
+        responsibilities: Array.isArray(exp.responsibilities)
+          ? exp.responsibilities.filter((resp) => resp.trim() !== "")
+          : [],
       })),
     };
+    console.log("Submitting registration data:", formattedData);
+    
     await registerUser(formattedData);
   };
+
+  // Next step handler with validation
+  const handleNext = async () => {
+    console.log("Attempting to go to the next step");
+    const valid = await methods.trigger();
+    console.log("Validation result:", valid);
+    if (valid) {
+      console.log("Validation passed, moving to the next step");
+      setStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
+    } else {
+      console.log("Validation failed, not moving to the next step");
+    }
+  };
+
+  // Previous step handler
+  const handlePrev = () => setStep((prev) => Math.max(prev - 1, 1));
 
   const renderStep = () => {
     switch (step) {
       case 1:
         return (
           <>
-            <InputField name="username" label="Username" placeholder="Enter your username" required />
+            <InputField
+              name="username"
+              label="Username"
+              placeholder="Enter your username"
+              required
+            />
             <InputField
               name="email"
               label="Email"
@@ -91,16 +138,43 @@ const RegisterPage = () => {
               placeholder="Enter your password"
               required
             />
-            <InputField name="fullName" label="Full Name" placeholder="Enter your full name" required />
-            <InputField name="role" label="Role" placeholder="e.g., Software Engineer" required />
-            <InputField name="headline" label="Headline" placeholder="e.g., Full Stack Developer" />
-            <InputField name="bio" label="Bio" placeholder="Tell us about yourself" />
+            <InputField
+              name="fullName"
+              label="Full Name"
+              placeholder="Enter your full name"
+              required
+            />
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
+                Role
+              </label>
+              <select
+                {...methods.register("role", { required: true })}
+                className="w-full px-4 py-2 border rounded-lg bg-[var(--color-background)] text-[var(--color-text)]"
+              >
+                <option value="">Select your role</option>
+                <option value="Jobseeker">Jobseeker</option>
+                <option value="Employer">Employer</option>
+              </select>
+            </div>
+            <InputField
+              name="headline"
+              label="Headline"
+              placeholder="e.g., Full Stack Developer"
+            />
+            <InputField
+              name="bio"
+              label="Bio"
+              placeholder="Tell us about yourself"
+            />
           </>
         );
       case 2:
         return (
           <>
-            <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4">Experience</h3>
+            <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4">
+              Experience
+            </h3>
             {experienceFields.map((field, index) => (
               <div key={field.id} className="mb-4 p-4 border rounded-lg">
                 <InputField
@@ -123,7 +197,9 @@ const RegisterPage = () => {
                     Responsibilities
                   </label>
                   <textarea
-                    {...methods.register(`experience[${index}].responsibilities`)}
+                    {...methods.register(
+                      `experience[${index}].responsibilities`
+                    )}
                     className="w-full px-4 py-2 border rounded-lg bg-[var(--color-background)] text-[var(--color-text)]"
                     placeholder="Enter responsibilities (one per line)"
                     rows="4"
@@ -144,12 +220,19 @@ const RegisterPage = () => {
               type="button"
               variant="secondary"
               onClick={() =>
-                appendExperience({ organization: '', role: '', duration: '', responsibilities: [''] })
+                appendExperience({
+                  organization: "",
+                  role: "",
+                  duration: "",
+                  responsibilities: [""],
+                })
               }
             >
               Add Experience
             </Button>
-            <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 mt-6">Education</h3>
+            <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 mt-6">
+              Education
+            </h3>
             {educationFields.map((field, index) => (
               <div key={field.id} className="mb-4 p-4 border rounded-lg">
                 <InputField
@@ -187,7 +270,12 @@ const RegisterPage = () => {
               type="button"
               variant="secondary"
               onClick={() =>
-                appendEducation({ institution: '', degree: '', fieldOfStudy: '', duration: '' })
+                appendEducation({
+                  institution: "",
+                  degree: "",
+                  fieldOfStudy: "",
+                  duration: "",
+                })
               }
             >
               Add Education
@@ -197,7 +285,9 @@ const RegisterPage = () => {
       case 3:
         return (
           <>
-            <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4">Skills</h3>
+            <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4">
+              Skills
+            </h3>
             {skillFields.map((field, index) => (
               <div key={field.id} className="flex items-center mb-2">
                 <InputField
@@ -220,11 +310,13 @@ const RegisterPage = () => {
             <Button
               type="button"
               variant="secondary"
-              onClick={() => appendSkill('')}
+              onClick={() => appendSkill("")}
             >
               Add Skill
             </Button>
-            <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 mt-6">Projects</h3>
+            <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 mt-6">
+              Projects
+            </h3>
             {projectFields.map((field, index) => (
               <div key={field.id} className="mb-4 p-4 border rounded-lg">
                 <InputField
@@ -262,7 +354,12 @@ const RegisterPage = () => {
               type="button"
               variant="secondary"
               onClick={() =>
-                appendProject({ projectName: '', description: '', technologies: '', duration: '' })
+                appendProject({
+                  projectName: "",
+                  description: "",
+                  technologies: "",
+                  duration: "",
+                })
               }
             >
               Add Project
@@ -275,56 +372,75 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)]">
-      <Navbar />
-      <div className="container mx-auto px-4 pt-20">
-        <Hero />
-        <div className="flex justify-center">
-          <div className="w-full max-w-2xl bg-white dark:bg-[var(--color-background)] shadow-lg rounded-lg p-8">
+    <div className="min-h-screen bg-[var(--color-background)] flex flex-col">
+      <div className="flex justify-center flex-grow overflow-auto py-8">
+        <div className="w-full max-w-3xl bg-white dark:bg-[var(--color-background)] shadow-lg rounded-lg flex flex-col h-full max-h-[90vh]">
+          <div className="p-6 overflow-y-auto flex-grow">
             <h2 className="text-2xl font-bold text-[var(--color-text)] mb-6 text-center">
-              Register - Step {step} of 3
+              Register - Step {step} of {TOTAL_STEPS}
             </h2>
+            {/* Step Indicators */}
             <div className="flex justify-between mb-6">
               {[1, 2, 3].map((s) => (
                 <div
                   key={s}
-                  className={`w-1/3 h-2 rounded-full ${
-                    s <= step ? 'bg-[var(--color-primary)]' : 'bg-gray-300 dark:bg-gray-600'
+                  className={`w-1/3 h-2 mx-1 rounded-full ${
+                    s <= step
+                      ? "bg-[var(--color-primary)]"
+                      : "bg-gray-300 dark:bg-gray-600"
                   }`}
                 ></div>
               ))}
             </div>
             <FormProvider {...methods}>
               <form onSubmit={methods.handleSubmit(onSubmit)} noValidate>
-                {renderStep()}
+                <div className="space-y-6">{renderStep()}</div>
+                {/* Error or Success */}
                 {error && (
-                  <p className="text-red-500 text-sm mb-4" role="alert">
+                  <p className="text-red-500 text-sm mt-4" role="alert">
                     {error}
                   </p>
                 )}
                 {success && (
-                  <p className="text-green-500 text-sm mb-4" role="alert">
+                  <p className="text-green-500 text-sm mt-4" role="alert">
                     {success}
                   </p>
                 )}
-                <div className="flex justify-between mt-6">
-                  {step > 1 && (
-                    <Button type="button" variant="secondary" onClick={() => setStep(step - 1)}>
-                      Previous
-                    </Button>
-                  )}
-                  <Button type="submit" isLoading={isLoading}>
-                    {step === 3 ? 'Register' : 'Next'}
-                  </Button>
-                </div>
-                <p className="mt-4 text-sm text-[var(--color-text)] text-center">
-                  Already have an account?{' '}
-                  <Link to="/login" className="text-[var(--color-primary)] hover:underline">
+                {/* Link to Login */}
+                <p className="mt-6 text-sm text-[var(--color-text)] text-center">
+                  Already have an account?{" "}
+                  <Link
+                    to="/login"
+                    className="text-[var(--color-primary)] hover:underline"
+                  >
                     Login
                   </Link>
                 </p>
+                {/* Only show Register button on last step */}
+                {step === TOTAL_STEPS && (
+                  <div className="flex justify-end mt-8">
+                    <Button type="submit" isLoading={isLoading}>
+                      Register
+                    </Button>
+                  </div>
+                )}
               </form>
             </FormProvider>
+          </div>
+          {/* Sticky Bottom Button Bar */}
+          <div className="p-6 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-[var(--color-background)] flex justify-between">
+            {step > 1 ? (
+              <Button type="button" variant="secondary" onClick={handlePrev}>
+                Previous
+              </Button>
+            ) : (
+              <span />
+            )}
+            {step < TOTAL_STEPS && (
+              <Button type="button" onClick={handleNext}>
+                Next
+              </Button>
+            )}
           </div>
         </div>
       </div>

@@ -3,7 +3,7 @@ import { Outlet } from 'react-router-dom';
 import Navbar from '../common/Navbar';
 import Footer from '../common/Footer';
 
-const MainLayout = () => {
+const LandingPageLayout = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -15,4 +15,4 @@ const MainLayout = () => {
   );
 };
 
-export default MainLayout;
+export default LandingPageLayout;

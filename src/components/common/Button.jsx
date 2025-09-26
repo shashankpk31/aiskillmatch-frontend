@@ -1,6 +1,13 @@
 import React from 'react';
 
-const Button = ({ children, type = 'button', variant = 'primary', disabled = false, isLoading = false }) => {
+const Button = ({ 
+  children, 
+  type = 'button', 
+  variant = 'primary', 
+  disabled = false, 
+  isLoading = false, 
+  onClick // Add onClick prop
+}) => {
   const baseStyles = 'px-6 py-2 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors';
   const variantStyles =
     variant === 'primary'
@@ -14,6 +21,7 @@ const Button = ({ children, type = 'button', variant = 'primary', disabled = fal
       disabled={disabled || isLoading}
       className={`${baseStyles} ${variantStyles} ${disabledStyles}`}
       aria-disabled={disabled || isLoading}
+      onClick={onClick} // Ensure onClick is passed to the button
     >
       {isLoading ? (
         <span className="flex items-center">

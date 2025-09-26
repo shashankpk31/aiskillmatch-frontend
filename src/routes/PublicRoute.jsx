@@ -3,9 +3,7 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 const PublicRoute = () => {
-  const { user } = useAuth();
-  console.log("user", user);
-  
+  const { user } = useAuth();  
   return !user || user==null ? <Outlet /> : <Navigate to="/" replace />;
 };
 

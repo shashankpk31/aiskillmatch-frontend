@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { FormProvider, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -9,10 +9,9 @@ import Button from '../../components/common/Button';
 import { useAuth } from '../../hooks/useAuth';
 
 const schema = yup.object({
-  email: yup
+  username: yup
     .string()
-    .email('Invalid email format')
-    .required('Email is required'),
+    .required('Username is required'),
   password: yup
     .string()
     .min(6, 'Password must be at least 6 characters')
@@ -46,10 +45,10 @@ const LoginPage = () => {
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
           <InputField
-            name="email"
-            label="Email"
-            type="email"
-            autoComplete="email"
+            name="username"
+            label="Username"
+            type="text"
+            autoComplete="username"
             required
           />
 
