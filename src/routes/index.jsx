@@ -4,6 +4,7 @@ import PrivateRoute from "./PrivateRoute";
 import PublicRoute from "./PublicRoute";
 import LandingPageLayout from "../components/layout/LandingPageLayout";
 import DashboardLayout from "../components/layout/DashboardLayout";
+import WelcomePage from "../pages/auth/WelcomePage";
 
 // Lazy load pages
 const HomePage = lazy(() => import("../pages/common/HomePage"));
@@ -31,7 +32,7 @@ const AppRoutes = () => {
       <Route element={<DashboardLayout />}>
         {/* Protected Routes */}
         <Route element={<PrivateRoute />}>
-          {/* <Route path="/welcome" element={<WelcomePage />} /> */}
+          <Route path="/welcome" element={<WelcomePage />} />
           <Route path="/jobs/:id" element={<JobPage />} />
         </Route>
       </Route>

@@ -9,15 +9,15 @@ import Navbar from '../../components/common/Navbar';
 
 const PasswordResetRequestPage = () => {
   const methods = useForm();
-  const { requestPasswordResetEmail, isLoading, error, success, clearAuthMessages, user } = useAuth();
+  const { requestPasswordResetEmail, isLoading, error, success, clearAuthMessages, loggedin } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
-      navigate('/');
+    if (loggedin) {
+      navigate('/welcome');
     }
     return () => clearAuthMessages();
-  }, [user, navigate, clearAuthMessages]);
+  }, [loggedin, navigate, clearAuthMessages]);
 
   const onSubmit = async (data) => {
     await requestPasswordResetEmail(data.email);

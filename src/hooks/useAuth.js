@@ -1,3 +1,4 @@
+import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -13,9 +14,17 @@ import axiosInstance from '../api/axiosInstance';
 export const useAuth = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user, token, loading, error, successMessage } = useSelector(
+  const { loggedin, token, loading, error, successMessage } = useSelector(
     (state) => state.auth
   );
+
+  // On app load, sync Redux with localStorage
+  React.useEffect(() => {
+    const storedToken = localStorage.getItem('token');
+    if (storedToken && !token) {
+      dispatch(setCredentials({ loggedin: true, token: storedToken }));
+    }
+  }, [dispatch, token]);
 
   const registerUser = async (data) => {
     try {
@@ -25,7 +34,7 @@ export const useAuth = () => {
       const response = await axiosInstance.post('/auth/register', data);
 
       // Expecting only a success message, no user/token
-      if (response.data.success) {
+      if (response.data.loggedin) {
         dispatch(setSuccessMessage(response.data.message || 'Registration successful!'));
       } else {
         dispatch(setError(response.data.message || 'Registration failed.'));
@@ -35,6 +44,7 @@ export const useAuth = () => {
       dispatch(setError(err.response?.data?.message || 'Registration failed'));
     } finally {
       dispatch(setLoading(false));
+      navigate('/login');
     }
   };
 
@@ -44,17 +54,23 @@ export const useAuth = () => {
       dispatch(setLoading(true));
       dispatch(clearMessages());
       const response = await axiosInstance.post('/auth/login', credentials);
-      dispatch(setCredentials(response.data));
-      dispatch(setSuccessMessage('Login successful!'));
-      navigate('/dashboard');
+      if (response.data.loggedin && response.data.token) {
+        localStorage.setItem('token', response.data.token); // Save token
+        dispatch(setCredentials(response.data));
+        dispatch(setSuccessMessage('Login successful!'));
+        navigate('/welcome');
+      } else {
+        dispatch(setError('Invalid login response'));
+      }
     } catch (err) {
-      dispatch(setError(err.response?.data?.message || 'Login failed'));
+      dispatch(setError(err.response?.data?.token || 'Login failed'));
     } finally {
       dispatch(setLoading(false));
     }
   };
 
   const logout = () => {
+    localStorage.removeItem('token'); // Remove token
     dispatch(clearCredentials());
     dispatch(clearMessages());
     navigate('/login');
@@ -65,7 +81,7 @@ export const useAuth = () => {
   };
 
   return {
-    user,
+    loggedin,
     token,
     loading,
     error,
